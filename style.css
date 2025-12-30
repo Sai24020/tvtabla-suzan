@@ -15,13 +15,13 @@ h1 {
 /* Loading Spinner */
 .loading-spinner {
   width: 100px;
-  display: none; /* default hidden */
   margin: 0 auto;
+  display: none;
   pointer-events: none;
 }
 
 .loading-spinner.show {
-  display: block; /* visas när .show används */
+  display: block;
   pointer-events: auto;
 }
 
@@ -41,11 +41,14 @@ h1 {
 .show-previous {
   text-align: center;
   font-weight: bold;
+  cursor: pointer;
+  background-color: #eee;
+  padding: 10px;
+  margin-bottom: 10px;
 }
 
 .show-previous:hover,
 .show-previous:focus {
-  cursor: pointer;
   background-color: #666;
   color: white;
   outline: none;
@@ -62,14 +65,14 @@ h1 {
   width: 50px;
   height: 50px;
   text-align: center;
+  cursor: pointer;
+  border-radius: 5px;
 }
 
 .menu-icon:hover,
 .menu-icon:focus {
   background-color: azure;
   color: black;
-  border-radius: 10px;
-  cursor: pointer;
   outline: none;
 }
 
@@ -85,7 +88,7 @@ ul.menu {
   width: 300px;
   height: 100vh;
   z-index: 1;
-  transition: left 0.3s ease;
+  transition: left 0.3s ease; /* för smooth öppning/stängning */
 }
 
 ul.menu.menu--show {
@@ -95,12 +98,12 @@ ul.menu.menu--show {
 ul.menu > li {
   padding: 20px;
   list-style: none;
+  cursor: pointer;
 }
 
 ul.menu > li:hover,
 ul.menu > li:focus {
   background-color: #666;
-  cursor: pointer;
   outline: none;
 }
 
@@ -111,4 +114,21 @@ ul.menu > li + li {
 ul.menu > li > ul > li {
   padding-left: 40px;
   background-color: #444;
+}
+
+/* Program list */
+.list-group-item {
+  margin-bottom: 5px;
+  padding: 10px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+.list-group-item strong {
+  margin-right: 10px;
+}
+
+/* Animation for menu (optional alternative) */
+.menu.transitioning {
+  transition: left 0.3s ease;
 }

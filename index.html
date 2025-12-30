@@ -10,118 +10,121 @@
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
-  <div id="app">
-    <!-- Menu -->
-    <nav aria-label="Huvudmeny">
-      <div class="menu-icon" @click="toggleMenu">
-        <i :class="menuOpen ? 'fas fa-times' : 'fas fa-bars'"></i>
+<div id="app">
+  <!-- Menu -->
+  <nav aria-label="Huvudmeny">
+    <div class="menu-icon" @click="toggleMenu">
+      <i :class="menuOpen ? 'fas fa-times' : 'fas fa-bars'"></i>
+    </div>
+    <ul class="menu" :class="{ 'menu--show': menuOpen }">
+      <li v-for="channel in channels" :key="channel" @click="selectChannel(channel)">
+        {{ channel }}
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Main content -->
+  <main class="container">
+    <div class="row">
+      <div class="col-sm-6 offset-sm-2">
+        <tv-schedule v-if="currentChannel" :channel="currentChannel"></tv-schedule>
       </div>
-      <ul class="menu" :class="{ 'menu--show': menuOpen }">
-        <li v-for="channel in channels" :key="channel" @click="selectChannel(channel)">
-          {{ channel }}
+    </div>
+  </main>
+</div>
+
+<script>
+const { createApp } = Vue;
+
+// TvSchedule-komponent
+const TvSchedule = {
+  props: ['channel'],
+  template: `
+    <div>
+      <h1>{{ channel }}</h1>
+      <ul class="list-group list-group-flush">
+        <li v-if="!showAll && futurePrograms.length < programs.length" class="list-group-item show-previous" @click="showAllPrograms">
+          Visa tidigare program
+        </li>
+        <li v-for="program in displayedPrograms" :key="program.start" class="list-group-item">
+          <strong>{{ formatTime(program.start) }}</strong>
+          <div>{{ program.name }}</div>
         </li>
       </ul>
-    </nav>
+      <img v-if="loading" src="loading.jpg" class="loading-spinner" alt="Laddar sida…"/>
+    </div>
+  `,
+  data() {
+    return {
+      programs: [],
+      loading: false,
+      cache: {},
+      showAll: false
+    }
+  },
+  computed: {
+    displayedPrograms() {
+      if (this.showAll) return this.programs;
+      const now = new Date();
+      return this.programs.filter(p => p.start >= now);
+    },
+    futurePrograms() {
+      const now = new Date();
+      return this.programs.filter(p => p.start >= now);
+    }
+  },
+  watch: {
+    channel: {
+      immediate: true,
+      handler(newChannel) { this.fetchPrograms(newChannel); }
+    }
+  },
+  methods: {
+    async fetchPrograms(channel) {
+      this.loading = true;
+      this.showAll = false;
 
-    <!-- Main content: använder komponent -->
-    <main class="container">
-      <div class="row">
-        <div class="col-sm-6 offset-sm-2">
-          <tv-schedule 
-            v-if="currentChannel"
-            :channel="currentChannel">
-          </tv-schedule>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <script>
-    const { createApp, ref, reactive, computed, onMounted } = Vue;
-
-    // Definiera komponenten
-    const TvSchedule = {
-      props: ['channel'],
-      template: `
-        <div>
-          <h1>{{ channel }}</h1>
-          <ul class="list-group list-group-flush">
-            <li v-if="futurePrograms.length && !showAll" class="list-group-item show-previous" @click="showAllPrograms">
-              Visa tidigare program
-            </li>
-            <li v-for="program in displayedPrograms" :key="program.start" class="list-group-item">
-              <strong>{{ formatTime(program.start) }}</strong>
-              <div>{{ program.program }}</div>
-            </li>
-          </ul>
-          <img v-if="loading" src="loading.jpg" class="loading-spinner" alt="Laddar sida…"/>
-        </div>
-      `,
-      data() {
-        return {
-          programs: [],
-          loading: false,
-          cache: {},
-          showAll: false
+      if (!this.cache[channel]) {
+        try {
+          const res = await fetch(`data/${channel}.json`);
+          const json = await res.json();
+          const sorted = json.map(p => ({
+            ...p,
+            start: new Date(p.start) // konvertera till Date
+          })).sort((a,b) => a.start - b.start);
+          this.cache[channel] = sorted;
+        } catch(e) {
+          console.error(e);
+          this.cache[channel] = [];
         }
-      },
-      computed: {
-        now() { return new Date(); },
-        futurePrograms() { return this.programs.filter(p => new Date(p.start) >= this.now); },
-        displayedPrograms() { return this.showAll ? this.programs : this.futurePrograms; }
-      },
-      watch: {
-        channel: {
-          immediate: true,
-          handler(newChannel) { this.fetchPrograms(newChannel); }
-        }
-      },
-      methods: {
-        async fetchPrograms(channel) {
-          this.loading = true;
-          this.showAll = false;
-
-          if (!this.cache[channel]) {
-            try {
-              const res = await fetch(`data/${channel}.json`);
-              const json = await res.json();
-              const sorted = json.map(p => ({ ...p, start: new Date(p.start) }))
-                                .sort((a,b) => a.start - b.start);
-              this.cache[channel] = sorted;
-            } catch(e) {
-              console.error(e);
-              this.cache[channel] = [];
-            }
-          }
-
-          this.programs = this.cache[channel];
-          this.loading = false;
-        },
-        showAllPrograms() { this.showAll = true; },
-        formatTime(date) { return new Date(date).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }); }
       }
-    };
 
-    // App
-    createApp({
-      components: { TvSchedule },
-      data() {
-        return {
-          channels: ['SVT 1','SVT 2','SVT Barn','Kunskapskanalen','SVT 24'],
-          currentChannel: null,
-          menuOpen: false
-        }
-      },
-      methods: {
-        toggleMenu() { this.menuOpen = !this.menuOpen; },
-        selectChannel(channel) { this.currentChannel = channel; this.menuOpen = false; }
-      },
-      mounted() {
-        if (this.channels.length) this.currentChannel = this.channels[0];
-      }
-    }).mount('#app');
-  </script>
+      this.programs = this.cache[channel];
+      this.loading = false;
+    },
+    showAllPrograms() { this.showAll = true; },
+    formatTime(date) { return new Date(date).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }); }
+  }
+};
+
+// Vue App
+createApp({
+  components: { TvSchedule },
+  data() {
+    return {
+      channels: ['SVT 1','SVT 2','SVT Barn','Kunskapskanalen','SVT 24'],
+      currentChannel: null,
+      menuOpen: false
+    }
+  },
+  methods: {
+    toggleMenu() { this.menuOpen = !this.menuOpen; },
+    selectChannel(channel) { this.currentChannel = channel; this.menuOpen = false; }
+  },
+  mounted() {
+    if (this.channels.length) this.currentChannel = this.channels[0];
+  }
+}).mount('#app');
+</script>
 </body>
 </html>
-
-
