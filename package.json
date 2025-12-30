@@ -1,0 +1,19 @@
+{
+  "name": "tvtabla-suzan",
+  "version": "1.0.0",
+  "description": "Detta projekt innehåller Cypress end-to-end tester för en TV-schema applikation.",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "cypress.config.js",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:open-debug": "cross-env CYPRESS_REMOTE_DEBUGGING_PORT=9222 cypress open",
+    "cypress:run-debug": "cross-env CYPRESS_REMOTE_DEBUGGING_PORT=9222 cypress run"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "cypress": "^13.3.0"
+  }
+}

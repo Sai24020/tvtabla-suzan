@@ -1,0 +1,61 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script async src="script.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-giJoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"
+      rel="stylesheet"
+      />
+      <link href="style.css" rel="stylesheet"/>
+      <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&display=swap" rel="stylesheet">
+    <title>Tv-tablå Labb</title>
+  </head>
+  <body>
+  <!-- Menu-->
+       <div class="menu-icon" onclick="toggleMenu()">
+          <i class="fas fa-bars"></i>
+        </div>
+        <ul class="menu">
+          <li onclick="setChannel('SVT 1')">SVT 1</li>
+          <li onclick="setChannel('SVT 2')">SVT 2</li>
+          <li onclick="setChannel('SVT Barn')">SVT Barn</li>
+          <li onclick="setChannel('Kunskapskanalen')">Kunskapskanalen</li>
+          <li onclick="setChannel('SVT 24')">SVT 24</li>
+        </ul>
+
+  <!-- Page content -->
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-6 offset-sm-2">
+      <!-- I DENNA H1 SKA VALD TV-KANALS NAMN SKRIVAS UT -->
+      <h1 id="js-title"></h1>
+      <div id="js-schedule">
+        <!-- EXEMPEL-HTML, SOM SKA LÄGGAS IN MED JAVASCRIPT UTIFRÅN JSON-DATA -->
+        <!--
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item show-previous">Visa tidigare program</li>
+          <li class="list-group-item">
+            <strong>13:00</strong>
+            <div>Vinterstudion</div>
+          </li>s
+          <li class="list-group-item">
+            <strong>13:30</strong>
+            <div>Alpint: VM</div>
+          </li>    
+        </ul>   
+        -->
+      </div>
+      <!-- DENNA VISAS BARA NÄR INGEN DATA LADDATS-->
+      <img src="loading.gif" id="js-loading" class="loading-spinner hidden" alt="Page loader"/>
+     </div>
+    </div>
+  </div>  
+  </body>
+</html>
