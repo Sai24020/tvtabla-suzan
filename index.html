@@ -3,45 +3,125 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TV-tablå Labb</title>
-  <meta name="description" content="Se dagens TV-tablå för SVT-kanalerna. Snabbt och enkelt hittar du programinformation och starttider.">
-
-  <!-- Stylesheets -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" rel="stylesheet">
+  <title>TV-tablå Labb - Vue Component</title>
   <link rel="stylesheet" href="style.css">
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
-  <!-- Menu -->
-  <nav aria-label="Huvudmeny">
-    <div class="menu-icon" aria-label="Meny knapp" role="button" tabindex="0">
-      <i class="fas fa-bars" aria-hidden="true"></i>
-    </div>
-    <ul class="menu" role="menu">
-      <li tabindex="0">SVT 1</li>
-      <li tabindex="0">SVT 2</li>
-      <li tabindex="0">SVT Barn</li>
-      <li tabindex="0">Kunskapskanalen</li>
-      <li tabindex="0">SVT 24</li>
-    </ul>
-  </nav>
-
-  <!-- Main content -->
-  <main class="container">
-    <div class="row">
-      <div class="col-sm-6 offset-sm-2">
-        <h1 id="js-title"></h1>
-        <div id="js-schedule" aria-live="polite" tabindex="0"></div>
-        <img src="loading.jpg" id="js-loading" class="loading-spinner" alt="Laddar sida…"/>
+  <div id="app">
+    <!-- Menu -->
+    <nav aria-label="Huvudmeny">
+      <div class="menu-icon" @click="toggleMenu">
+        <i :class="menuOpen ? 'fas fa-times' : 'fas fa-bars'"></i>
       </div>
-    </div>
-  </main>
+      <ul class="menu" :class="{ 'menu--show': menuOpen }">
+        <li v-for="channel in channels" :key="channel" @click="selectChannel(channel)">
+          {{ channel }}
+        </li>
+      </ul>
+    </nav>
 
-  <!-- Scripts -->
-  <script src="script.js" defer></script>
+    <!-- Main content: använder komponent -->
+    <main class="container">
+      <div class="row">
+        <div class="col-sm-6 offset-sm-2">
+          <tv-schedule 
+            v-if="currentChannel"
+            :channel="currentChannel">
+          </tv-schedule>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const { createApp, ref, reactive, computed, onMounted } = Vue;
+
+    // Definiera komponenten
+    const TvSchedule = {
+      props: ['channel'],
+      template: `
+        <div>
+          <h1>{{ channel }}</h1>
+          <ul class="list-group list-group-flush">
+            <li v-if="futurePrograms.length && !showAll" class="list-group-item show-previous" @click="showAllPrograms">
+              Visa tidigare program
+            </li>
+            <li v-for="program in displayedPrograms" :key="program.start" class="list-group-item">
+              <strong>{{ formatTime(program.start) }}</strong>
+              <div>{{ program.program }}</div>
+            </li>
+          </ul>
+          <img v-if="loading" src="loading.jpg" class="loading-spinner" alt="Laddar sida…"/>
+        </div>
+      `,
+      data() {
+        return {
+          programs: [],
+          loading: false,
+          cache: {},
+          showAll: false
+        }
+      },
+      computed: {
+        now() { return new Date(); },
+        futurePrograms() { return this.programs.filter(p => new Date(p.start) >= this.now); },
+        displayedPrograms() { return this.showAll ? this.programs : this.futurePrograms; }
+      },
+      watch: {
+        channel: {
+          immediate: true,
+          handler(newChannel) { this.fetchPrograms(newChannel); }
+        }
+      },
+      methods: {
+        async fetchPrograms(channel) {
+          this.loading = true;
+          this.showAll = false;
+
+          if (!this.cache[channel]) {
+            try {
+              const res = await fetch(`data/${channel}.json`);
+              const json = await res.json();
+              const sorted = json.map(p => ({ ...p, start: new Date(p.start) }))
+                                .sort((a,b) => a.start - b.start);
+              this.cache[channel] = sorted;
+            } catch(e) {
+              console.error(e);
+              this.cache[channel] = [];
+            }
+          }
+
+          this.programs = this.cache[channel];
+          this.loading = false;
+        },
+        showAllPrograms() { this.showAll = true; },
+        formatTime(date) { return new Date(date).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }); }
+      }
+    };
+
+    // App
+    createApp({
+      components: { TvSchedule },
+      data() {
+        return {
+          channels: ['SVT 1','SVT 2','SVT Barn','Kunskapskanalen','SVT 24'],
+          currentChannel: null,
+          menuOpen: false
+        }
+      },
+      methods: {
+        toggleMenu() { this.menuOpen = !this.menuOpen; },
+        selectChannel(channel) { this.currentChannel = channel; this.menuOpen = false; }
+      },
+      mounted() {
+        if (this.channels.length) this.currentChannel = this.channels[0];
+      }
+    }).mount('#app');
+  </script>
 </body>
 </html>
+
+
