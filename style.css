@@ -1,72 +1,114 @@
+/* Global */
 body {
-    background-color:bisque;
-    font-family: 'Roboto Condensed', sans-serif;
-    margin-top: 20px;
+  background-color: bisque;
+  font-family: 'Roboto Condensed', sans-serif;
+  margin: 0;
+  padding-top: 20px;
 }
 
 h1 {
-    text-align: center;
-    margin-top: 10px;
-    margin-bottom: 20px;
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 20px;
 }
 
+/* Loading Spinner */
 .loading-spinner {
-    width: 100%;
+  width: 100px;
+  display: none; /* default hidden */
+  margin: 0 auto;
+  pointer-events: none;
 }
 
-.hidden {
-    display: none;
+.loading-spinner.show {
+  display: block; /* visas när .show används */
+  pointer-events: auto;
 }
 
+.loading-spinner img {
+  width: 100%;
+  display: block;
+  margin: 0 auto;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Show previous button */
 .show-previous {
-    text-align: center;
+  text-align: center;
+  font-weight: bold;
 }
 
-.show-previous:hover {
-    cursor: pointer;
-    background-color: #666;
-    color: white;
+.show-previous:hover,
+.show-previous:focus {
+  cursor: pointer;
+  background-color: #666;
+  color: white;
+  outline: none;
 }
 
+/* Menu Icon */
 .menu-icon {
-    z-index: 2;
-    position: absolute;
-    left: 20px;
-    top: 20px;
-    padding: 10px;
-    font-size: 30px;
-    width: 50px;
-    height: 50px;
-    text-align: center;
+  z-index: 2;
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  padding: 10px;
+  font-size: 30px;
+  width: 50px;
+  height: 50px;
+  text-align: center;
 }
 
-.menu-icon:hover {
-    background-color:azure;
-    color: black;
-    border-radius: 10px;
+.menu-icon:hover,
+.menu-icon:focus {
+  background-color: azure;
+  color: black;
+  border-radius: 10px;
+  cursor: pointer;
+  outline: none;
 }
 
+/* Menu */
 ul.menu {
-    padding: 80px 0px;
-    background-color: #333;
-    color: white;
-    position: absolute;
-    top: 0;
-    left: -300px;
-    width: 300px;
-    height: 100vh;
-    z-index: 1; 
+  display: block;
+  padding-top: 80px;
+  background-color: #333;
+  color: white;
+  position: absolute;
+  top: 0;
+  left: -300px;
+  width: 300px;
+  height: 100vh;
+  z-index: 1;
+  transition: left 0.3s ease;
 }
 
 ul.menu.menu--show {
-    left: 0;
+  left: 0;
 }
 
 ul.menu > li {
-    padding: 20px;
-    list-style: none;;
+  padding: 20px;
+  list-style: none;
 }
-ul.menu > li:hover {
-    background-color: #666;
-    cursor: pointer;
+
+ul.menu > li:hover,
+ul.menu > li:focus {
+  background-color: #666;
+  cursor: pointer;
+  outline: none;
+}
+
+ul.menu > li + li {
+  border-top: 1px solid white;
+}
+
+ul.menu > li > ul > li {
+  padding-left: 40px;
+  background-color: #444;
 }
